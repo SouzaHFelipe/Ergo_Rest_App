@@ -1,10 +1,11 @@
 import sys
 import logging
 import keyboard as key
+import time
 from pynput.keyboard import Key , Listener
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit)
+    QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QMessageBox)
 
 # 📋 Configura o log: em arquivo e console
 logging.basicConfig(
@@ -22,6 +23,9 @@ class MainWindow(QWidget):
         self.resize(300, 100)
         self.lyt = QVBoxLayout()
         self.setLayout(self.lyt)
+
+        self.estado_janela = "normal"  # ou "maximized"
+
 
         # Campo de entrada de tempo
         self.txt_tempo = QLineEdit()
@@ -48,6 +52,7 @@ class MainWindow(QWidget):
         self.btn_continuar_tempo.hide()
         self.lyt.addWidget(self.btn_continuar_tempo)
         self.btn_continuar_tempo.clicked.connect(self.continuar_tempo)
+        
 
         # Botão para reiniciar
         self.reiniciar_tempo = QPushButton('Reiniciar Tempo')
@@ -77,16 +82,22 @@ class MainWindow(QWidget):
         for i in range(150):
             key.block_key(i)
 
+
+    # Botao de mensagem de aviso tempo terminou
+    def aviso_tempo(self):
+        msg_aviso = QMessageBox(self)
+        msg_aviso.setWindowTitle('Aviso')
+        msg_aviso.setText('Tempo Finalizado')
+        msg_aviso.exec()
+
     def liberar_teclado(self):
         for i in range(150):
             key.unblock_key(i)
 
-
     def chegou_tempo(self):
-        if self.contador == self.tempo:
             logging.info("Tempo chegou ao limite definido.")
             self.timer.stop()
-            self.travar_teclado()
+            #self.travar_teclado()
 
     def iniciador_tempo(self):
         logging.info("Começou o tempo.")
@@ -99,6 +110,8 @@ class MainWindow(QWidget):
         self.btn_parar.show()
         self.reiniciar_tempo.hide()
         self.btn_continuar_tempo.hide()
+        QTimer.singleShot(3000, self.showMinimized)
+
 
     def para_tempo(self):
         self.timer.stop()
@@ -131,10 +144,20 @@ class MainWindow(QWidget):
         self.contador += 1
         minutos = self.contador // 60
         segundos = self.contador % 60
-        tempo = f"{minutos:02d}:{segundos:02d}"
-        self.lbl.setText(f'Time  :  {tempo}')
-
-
+        tempo_iniciar = f"{minutos:02d}:{segundos:02d}"
+        self.lbl.setText(f'Time  :  {tempo_iniciar}')
+        if self.contador == self.tempo:
+            self.showNormal()  # Traz a janela de volta
+            self.chegou_tempo()
+            self.aviso_tempo()
+            self.contador = 0
+            self.lbl.setText(f'Time  :  00:00 ')
+            self.btn_parar.hide()
+            self.btn.show()
+            self.activateWindow()     # garante que ela receba foco
+            self.raise_()             # traz para frente
+            
+            
 app = QApplication(sys.argv)
 window = MainWindow()
 window.show()
