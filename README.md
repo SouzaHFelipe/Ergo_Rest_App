@@ -8,3 +8,4 @@ App para questoes ergonomicas
 <br>
 
 <img width="297" height="131" alt="image" src="https://github.com/user-attachments/assets/a51e5283-ae2a-438e-832f-edc3f50564ea" />
+

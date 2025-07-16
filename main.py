@@ -1,9 +1,9 @@
+
 import sys
 import logging
-import keyboard as key
-import time
-from pynput.keyboard import Key , Listener
-from PySide6.QtCore import QTimer
+from plyer import notification  # coloque isso no topo do arquivo
+from PySide6.QtGui import QKeyEvent
+from PySide6.QtCore import QTimer , QObject , QEvent ,Qt
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QMessageBox)
 
@@ -67,8 +67,22 @@ class MainWindow(QWidget):
 
         # Variáveis de tempo
         self.contador = 0
+        self.contador_aviso = 0
         self.tempo = 0
 
+    def bloqueia_teclado(self, event):
+        if event.type() == QEvent.KeyPress:
+            if event.key() == Qt.Key_Escape:
+                print("Emergência ativada!")
+                return False  # Permite o ESC
+            return True  # Bloqueia outras teclas
+        return False
+    
+    def libera_teclado(self,event):
+        if event.type() == QEvent.KeyPress:
+            return False  
+        return True
+    
     def adicionar_tempo(self):
         try:
             self.tempo = int(self.txt_tempo.text())
@@ -78,29 +92,41 @@ class MainWindow(QWidget):
             self.tempo = 0
         return self.tempo
 
-    def travar_teclado(self):
-        for i in range(150):
-            key.block_key(i)
 
-
-    # Botao de mensagem de aviso tempo terminou
     def aviso_tempo(self):
+        notification.notify(
+            title='Tempo Finalizado!',
+            message='Hora de descansar. Levante-se e alongue-se por 1 minuto.',
+            timeout=10
+        )
+
+        # 🪟 Caixa de diálogo PySide
         msg_aviso = QMessageBox(self)
-        msg_aviso.setWindowTitle('Aviso')
-        msg_aviso.setText('Tempo Finalizado')
+        msg_aviso.setWindowTitle('Tempo Finalizado!')
+        msg_aviso.setText('Hora de descansar. Levante-se e alongue-se por ')
+        self.timer_aviso()
         msg_aviso.exec()
 
-    def liberar_teclado(self):
-        for i in range(150):
-            key.unblock_key(i)
+    def timer_aviso(self):
 
-    def chegou_tempo(self):
-            logging.info("Tempo chegou ao limite definido.")
-            self.timer.stop()
-            #self.travar_teclado()
+        logging.info('Começou tempo de descanso')
+        self.contador_aviso = 0
+        self.tempo_pausa = 60  # tempo de pausa em segundos
+
+        # Cria um novo timer para pausa
+        self.timer_pausa = QTimer(self)
+        self.timer_pausa.setInterval(1000)
+        self.timer_pausa.timeout.connect(self.contador_pausa)
+        self.timer_pausa.start()
+
+    def contador_pausa(self):
+        self.contador_aviso +=1
+        tempo_pausa = 100
+        self.lbl.setText(f'Time  :  {tempo_pausa}')
+
 
     def iniciador_tempo(self):
-        logging.info("Começou o tempo.")
+        logging.info("Comecou o tempo.")
         self.adicionar_tempo()
         self.contador = 0
         self.timer.start()
@@ -110,8 +136,7 @@ class MainWindow(QWidget):
         self.btn_parar.show()
         self.reiniciar_tempo.hide()
         self.btn_continuar_tempo.hide()
-        QTimer.singleShot(3000, self.showMinimized)
-
+        self.minimizar_depois()
 
     def para_tempo(self):
         self.timer.stop()
@@ -128,17 +153,23 @@ class MainWindow(QWidget):
         self.btn_continuar_tempo.hide()
         self.reiniciar_tempo.hide()
         self.btn_parar.show()
+        self.minimizar_depois()
 
     def reiniciar_timer(self):
         self.timer.stop()
         self.contador = 0
         self.lbl.setText("Time  :  00:00")
-        self.timer.start()
         logging.info("Timer reiniciado!")
-
         self.btn_continuar_tempo.hide()
         self.reiniciar_tempo.hide()
         self.btn_parar.show()
+        self.timer.start()
+        self.minimizar_depois()
+
+    def chegou_tempo(self):
+        if self.contador == self.tempo:
+            logging.info("Tempo chegou ao limite definido.")
+            self.timer.stop()
 
     def contar_tempo(self):
         self.contador += 1
@@ -155,9 +186,14 @@ class MainWindow(QWidget):
             self.btn_parar.hide()
             self.btn.show()
             self.activateWindow()     # garante que ela receba foco
-            self.raise_()             # traz para frente
-            
-            
+            self.raise_()             # traz para 
+            fake_event = QKeyEvent(QEvent.KeyPress, Qt.Key_Escape, Qt.NoModifier)
+            self.bloqueia_teclado(fake_event)
+        
+    def minimizar_depois(self, milissegundos=3000):
+        self.showNormal()
+        QTimer.singleShot(milissegundos, self.showMinimized)
+                
 app = QApplication(sys.argv)
 window = MainWindow()
 window.show()
