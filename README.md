@@ -1,10 +1,11 @@
 # Ergo_Rest_App
 
-# 16/07/25
- # Resolvido alguns erros :
-  # clicar em reiniciar ele zerava o tempo e comeca o contador , ajustado linha de contar tempo
-  # clicar em reiniciar ou continuar tempo nao estava minimizando o app
-  # 
+App para questoes ergonomicas
 
-# Adicionado pyler que mando um aviso direto no windows ,  um reforco sobre o timer estar completo
-# 
+<img width="402" height="233" alt="image" src="https://github.com/user-attachments/assets/70df1c9e-6f12-4297-aefa-ec7abcde1b22" />
+
+<br>
+<br>
+
+<img width="297" height="131" alt="image" src="https://github.com/user-attachments/assets/a51e5283-ae2a-438e-832f-edc3f50564ea" />
+
