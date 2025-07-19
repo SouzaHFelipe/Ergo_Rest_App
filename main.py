@@ -24,9 +24,6 @@ class MainWindow(QWidget):
         self.lyt = QVBoxLayout()
         self.setLayout(self.lyt)
 
-        self.estado_janela = "normal"  # ou "maximized"
-
-
         # Campo de entrada de tempo
         self.txt_tempo = QLineEdit()
         self.txt_tempo.setPlaceholderText('Digite o tempo para descanso (em segundos)')
@@ -65,19 +62,48 @@ class MainWindow(QWidget):
         self.timer.setInterval(1000)
         self.timer.timeout.connect(self.contar_tempo)
 
+
+        self.timer_alert = QTimer(self)
+        self.timer_alert.setInterval(1000)
+        self.timer_alert.timeout.connect(self.contar_alert)
+
+
         # Variáveis de tempo
         self.contador = 0
-        self.contador_aviso = 0
+        self.contador_alert = 0
         self.tempo = 0
 
-    def bloqueia_teclado(self, event):
-        if event.type() == QEvent.KeyPress:
-            if event.key() == Qt.Key_Escape:
-                print("Emergência ativada!")
-                return False  # Permite o ESC
-            return True  # Bloqueia outras teclas
-        return False
-    
+    def atualizar_contador(self):
+        self.contador += 1
+        self.lbl_pop.setText(f"Contador: {self.contador} segundos")
+
+    def alert_pop(self):
+        self.contador_alert = 0  # reinicia contagem de descanso
+
+        self.pop_up = QWidget()
+        self.pop_up.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.pop_up.setStyleSheet("""
+            border-radius: 12px;
+        """)
+
+        self.lbl_pop = QLabel(f'Tempo de descanso iniciado!\n Time: 00:00')
+        self.lbl_pop.setAlignment(Qt.AlignCenter)
+        self.lbl_pop.setStyleSheet("color: black; font-size: 16px; padding: 10px;")
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.lbl_pop)
+        self.pop_up.setLayout(layout)
+        self.timer_alert.start()
+
+        self.pop_up.resize(300, 100)
+        self.pop_up.show()
+
+        QTimer.singleShot(6000, self.fechar_pop)
+
+    def fechar_pop(self):
+        self.timer_alert.stop()
+        self.pop_up.close()
+
     def libera_teclado(self,event):
         if event.type() == QEvent.KeyPress:
             return False  
@@ -91,39 +117,6 @@ class MainWindow(QWidget):
             logging.warning('Valor inválido digitado.')
             self.tempo = 0
         return self.tempo
-
-
-    def aviso_tempo(self):
-        notification.notify(
-            title='Tempo Finalizado!',
-            message='Hora de descansar. Levante-se e alongue-se por 1 minuto.',
-            timeout=10
-        )
-
-        # 🪟 Caixa de diálogo PySide
-        msg_aviso = QMessageBox(self)
-        msg_aviso.setWindowTitle('Tempo Finalizado!')
-        msg_aviso.setText('Hora de descansar. Levante-se e alongue-se por ')
-        self.timer_aviso()
-        msg_aviso.exec()
-
-    def timer_aviso(self):
-
-        logging.info('Começou tempo de descanso')
-        self.contador_aviso = 0
-        self.tempo_pausa = 60  # tempo de pausa em segundos
-
-        # Cria um novo timer para pausa
-        self.timer_pausa = QTimer(self)
-        self.timer_pausa.setInterval(1000)
-        self.timer_pausa.timeout.connect(self.contador_pausa)
-        self.timer_pausa.start()
-
-    def contador_pausa(self):
-        self.contador_aviso +=1
-        tempo_pausa = 100
-        self.lbl.setText(f'Time  :  {tempo_pausa}')
-
 
     def iniciador_tempo(self):
         logging.info("Comecou o tempo.")
@@ -171,6 +164,13 @@ class MainWindow(QWidget):
             logging.info("Tempo chegou ao limite definido.")
             self.timer.stop()
 
+    def contar_alert(self):
+        self.contador_alert += 1
+        self.minutos = self.contador_alert // 60
+        self.segundos = self.contador_alert % 60
+        self.tempo_iniciar = f"{self.minutos:02d}:{self.segundos:02d}"
+        self.lbl_pop.setText(f'Tempo de descanso iniciado!\n Time: {self.tempo_iniciar}')
+
     def contar_tempo(self):
         self.contador += 1
         minutos = self.contador // 60
@@ -180,16 +180,14 @@ class MainWindow(QWidget):
         if self.contador == self.tempo:
             self.showNormal()  # Traz a janela de volta
             self.chegou_tempo()
-            self.aviso_tempo()
+            self.alert_pop()
             self.contador = 0
             self.lbl.setText(f'Time  :  00:00 ')
             self.btn_parar.hide()
             self.btn.show()
             self.activateWindow()     # garante que ela receba foco
             self.raise_()             # traz para 
-            fake_event = QKeyEvent(QEvent.KeyPress, Qt.Key_Escape, Qt.NoModifier)
-            self.bloqueia_teclado(fake_event)
-        
+
     def minimizar_depois(self, milissegundos=3000):
         self.showNormal()
         QTimer.singleShot(milissegundos, self.showMinimized)

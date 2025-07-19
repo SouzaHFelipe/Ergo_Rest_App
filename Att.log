@@ -4,7 +4,10 @@
  # Resolvido alguns erros :
   # clicar em reiniciar ele zerava o tempo e comeca o contador , ajustado linha de contar tempo
   # clicar em reiniciar ou continuar tempo nao estava minimizando o app
-  # 
 
 # Adicionado pyler que mando um aviso direto no windows ,  um reforco sobre o timer estar completo
-# 
+
+# 18/07/25
+
+  #Realizado organizacao de algumas funcoes nao utilizadas
+  # Criado o pop-up no app pop informando sobre o descanso
