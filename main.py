@@ -1,15 +1,23 @@
 
 import sys
+import os
 import logging
+import re
 from plyer import notification  # coloque isso no topo do arquivo
 from PySide6.QtGui import QKeyEvent
 from PySide6.QtCore import QTimer , QObject , QEvent ,Qt
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QMessageBox)
 
-# 📋 Configura o log: em arquivo e console
+
+# Obtém o diretório onde está o script principal
+root_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Cria o caminho completo para o arquivo de log na pasta raiz
+log_path = os.path.join(root_dir, 'Rest_App.log')
+
 logging.basicConfig(
-    filename='Rest_App_Log.log',
+    filename='Rest_App.log',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -18,6 +26,8 @@ logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+
+        self.login_app()
 
         self.setWindowTitle('Rest App')
         self.resize(300, 100)
@@ -77,11 +87,47 @@ class MainWindow(QWidget):
         self.contador += 1
         self.lbl_pop.setText(f"Contador: {self.contador} segundos")
 
+    def login_app(self):
+
+        self.login = QWidget()
+        self.login.setWindowFlags(Qt.Tool | Qt.WindowStaysOnTopHint)
+        self.login.setWindowTitle('Login')
+        self.login.resize(300, 100)
+
+        self.login_name = QLineEdit()
+        self.login_name.setPlaceholderText('Coloque seu nome de usuario')
+
+        self.login_btn = QPushButton('Entrar')
+
+        self.login_lyt = QVBoxLayout()
+        self.login_lyt.addWidget(self.login_name)
+        self.login_lyt.addWidget(self.login_btn)
+
+        self.login.setLayout(self.login_lyt)
+        self.login.show()
+        self.login_btn.clicked.connect(self.validar_login)
+
+
+    def validar_login(self):
+        self.nome = self.login_name
+        
+        texto_usuario = self.login_name.text().strip()
+
+        if texto_usuario == "" or not re.fullmatch(r'[A-Za-z]+', texto_usuario):
+            logging.info('Erro no login ')
+            QMessageBox.warning(self.login, "Aviso", "Digite seu nome de usuário!")
+        else :
+            logging.info(f'Login Realizado {self.nome.text()}')
+            self.login.close()
+            self.show()
+            
+
     def alert_pop(self):
+
         self.contador_alert = 0  # reinicia contagem de descanso
 
         self.pop_up = QWidget()
-        self.pop_up.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.pop_up.setWindowFlags(Qt.Tool | Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint )
         self.pop_up.setStyleSheet("""
             border-radius: 12px;
         """)
@@ -97,12 +143,39 @@ class MainWindow(QWidget):
 
         self.pop_up.resize(300, 100)
         self.pop_up.show()
+        self.hide()
 
-        QTimer.singleShot(6000, self.fechar_pop)
+        self.btn_alert = QPushButton('Pular Descanso')
+        self.btn_alert.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;       /* Cor de fundo */
+                color: white;                    /* Cor do texto */
+                border: 2px solid #388E3C;       /* Borda personalizada */
+                border-radius: 8px;              /* Cantos arredondados */
+                padding: 6px 9px;               /* Espaçamento interno */
+                font-size: 14px;
+            }
+            
+            QPushButton:hover {
+                background-color: #45a049;       /* Efeito hover */
+            }
+
+            QPushButton:pressed {
+                background-color: #2E7D32;       /* Cor ao clicar */
+            }
+        """)
+
+        layout.addWidget(self.btn_alert)  # Adiciona o botão ao layout corretamente
+        self.btn_alert.clicked.connect(self.fechar_pop)  # ✅ Isso fecha o pop-up ao clicar
+
+
+        QTimer.singleShot(1000 * 60, self.fechar_pop)
+
 
     def fechar_pop(self):
         self.timer_alert.stop()
         self.pop_up.close()
+        self.show()
 
     def libera_teclado(self,event):
         if event.type() == QEvent.KeyPress:
@@ -194,5 +267,5 @@ class MainWindow(QWidget):
                 
 app = QApplication(sys.argv)
 window = MainWindow()
-window.show()
+#window.show()
 app.exec()
