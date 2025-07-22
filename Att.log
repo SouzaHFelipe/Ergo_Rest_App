@@ -1,11 +1,11 @@
 # Ergo_Rest_App
 
 # 16/07 v 0.2
- # Resolvido alguns erros :
+
   # clicar em reiniciar ele zerava o tempo e comeca o contador , ajustado linha de contar tempo
   # clicar em reiniciar ou continuar tempo nao estava minimizando o app
 
-# Adicionado pyler que mando um aviso direto no windows ,  um reforco sobre o timer estar completo
+  # Adicionado pyler que mando um aviso direto no windows ,  um reforco sobre o timer estar completo
 
 # 18/07 v 0.3
 
@@ -16,12 +16,26 @@
 
       # verificando a criacao de um login nao fazer push !!!!!!!!!!
 
-#19/07 v 0.3.-2
+    #19/07 v 0.3.-2
   
-  #bug que nao espera o timer do descanso terminar para voltar a tela principal - verificar!!!
+      #bug que nao espera o timer do descanso terminar para voltar a tela principal - verificar!!!
 
 #20/07 v 0.4
 
   #corrigido bug que timer nao espera 1 min para fechar
   # criado validacao de apenas letras para o nome de usuario
-  #ajustado layout do botao de descanso agora ele aparece
+  # ajustado layout do botao de descanso agora ele aparece
+
+    #21/07 v 0.4-1
+
+      # colocado login automatico caso nao teja um user ja cadastrado
+      # Criado botao para excluir o user
+      # Resolvido erros de dois clicks ao criar user
+
+#22/07 v0.5 
+
+  # ajustado se acionar o timer vazio ele funciona
+  # ajudstado se clicar em excluir user e criar um novo proximo user continuar com mesmo tempo , o tempo nao zera ao excluir user
+  # ajustado iniciar o timer e pausar ele minimiza a tela
+
+  
