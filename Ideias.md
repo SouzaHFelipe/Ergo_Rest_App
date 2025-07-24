@@ -9,13 +9,13 @@
 
 # uma mensagem informando caso computador fique muito tempo sem ser usado , enviar uma mensagem direto no whatsapp
 
-# criar um usuario de perfil para o app
+# criar um usuario de perfil para o app ... OK
    # criar configuracoes para exportar do user
 
 # criar tempos pre definidos para o start e um campo para personalizar
 
-# quando chegar ao tempo ter pop-up avisando para tirar um descanso
-  # travar tela e ter um timer para poder voltar
+# quando chegar ao tempo ter pop-up avisando para tirar um descanso  ... OK
+  # travar tela e ter um timer para poder voltar ... OK
   # ter opcao de desbloquear tela porem um tempo sera adicionado a proxima pausa
   # caso pular EXEMPLO mais de 3 paradas ter um parada obrigatoria
 

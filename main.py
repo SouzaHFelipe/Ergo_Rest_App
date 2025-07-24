@@ -5,7 +5,7 @@ import re
 import json
 from PySide6.QtCore import QTimer, QEvent, Qt
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QMessageBox)
+    QApplication, QWidget, QGridLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QMessageBox)
 
 # Obtém o diretório onde está o script principal
 root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -33,6 +33,7 @@ class MainWindow(QWidget):
         self.timer.setInterval(1000)
         self.timer.timeout.connect(self.contar_tempo)
 
+
         self.timer_alert = QTimer(self)
         self.timer_alert.setInterval(1000)
         self.timer_alert.timeout.connect(self.contar_alert)
@@ -46,14 +47,44 @@ class MainWindow(QWidget):
         self.contador_alert = 0
         self.tempo = 0
 
+        self.nome_titulo = self.carregar_usuario() or "Usuário"
+        self.lbl_user = QLabel(f'Usuario :  {self.nome_titulo.upper()}')
+        self.lyt.addWidget(self.lbl_user)
+        self.lbl_user.setStyleSheet(
+                """
+                padding: 5px 0px ;
+                font-size: 14px;
+                letter-spacing: 1px;
+                """
+            )
+
         # Interface
         self.txt_tempo = QLineEdit()
-        self.txt_tempo.setPlaceholderText('Digite o tempo para descanso (em segundos)')
+        self.txt_tempo.setPlaceholderText('Digite o tempo para descanso (minutos)')
         self.lyt.addWidget(self.txt_tempo)
+
+        
+
+        
+        
 
         self.lbl = QLabel("Time  :  00:00")
         self.lyt.addWidget(self.lbl)
+        self.lbl.setStyleSheet(
+                """
+                padding: 5px 0px ;
+                font-size: 14px;
+                letter-spacing: 1px;
+                """
+            )
 
+        self.grid_layout = QGridLayout()
+        self.lyt.insertLayout(1, self.grid_layout)
+        self.grid_layout.addWidget(self.lbl , 0 ,0)
+        self.grid_layout.addWidget(self.timer_set_5min(), 1, 0)
+        self.grid_layout.addWidget(self.timer_set_10min(), 1, 1)
+        self.grid_layout.addWidget(self.timer_set_20min(), 1, 2)
+        self.grid_layout.addWidget(self.timer_set_30min(), 1, 3)
 
         self.btn = QPushButton('Clique para iniciar')
         self.lyt.addWidget(self.btn)
@@ -74,9 +105,20 @@ class MainWindow(QWidget):
         self.lyt.addWidget(self.reiniciar_tempo)
         self.reiniciar_tempo.clicked.connect(self.reiniciar_timer)
 
+        
+
         # Login
         self.login_app()
         self.validar_user_criado()
+   
+   
+    def nome_user(self):
+        with open('config.json' , 'r' ) as f:
+            self.user_login = json.load(f)
+        
+        return self.user_login.get('usuario', 'Usuário')
+        
+
 
     def login_app(self):
         self.login = QWidget()
@@ -140,9 +182,9 @@ class MainWindow(QWidget):
 
     def validar_login(self):
         texto_usuario = self.login_name.text().strip()
-        if not re.fullmatch(r'[A-Za-z]+', texto_usuario):
+        if not re.fullmatch(r'[A-Za-z]{5,}', texto_usuario):
             logging.info('Erro no login: nome inválido')
-            QMessageBox.warning(self.login, "Aviso", "Digite apenas letras, sem espaços ou números.")
+            QMessageBox.warning(self.login, "Aviso", "Digite apenas letras, sem espaços ou números com no minimo 5 digitos !.")
         else:
             nome_existente = self.carregar_usuario()
             if texto_usuario != nome_existente:
@@ -176,6 +218,7 @@ class MainWindow(QWidget):
         self.btn_parar.hide()
         self.btn_continuar_tempo.show()
         self.reiniciar_tempo.show()
+        self.txt_tempo.show()
 
     def continuar_tempo(self):
         self.timer.start()
@@ -201,10 +244,11 @@ class MainWindow(QWidget):
         try:
             if re.fullmatch(r'\s*', texto):
                 raise ValueError("Campo vazio ou apenas espaços")
-            self.tempo = int(texto)
-            if self.tempo <= 0:
+            minutos = int(texto)
+            if minutos <= 0:
                 raise ValueError("Tempo deve ser maior que zero")
-            logging.info(f"Tempo definido: {self.tempo} segundos.")
+            self.tempo = minutos * 60  # 👈 converte aqui apenas uma vez!
+            logging.info(f"Tempo definido: {minutos} minutos ({self.tempo} segundos).")
             return self.tempo
         except ValueError as e:
             self.timer.stop()
@@ -213,6 +257,55 @@ class MainWindow(QWidget):
             self.tempo = 0
             return self.tempo
 
+    def timer_set_5min(self):
+        self.set_min = QPushButton(' 5:00 ')
+        self.lyt.addWidget(self.set_min)
+        self.set_min.clicked.connect(self.timer_5)
+        self.set_min.show()
+        return self.set_min
+
+    def timer_5(self):
+        self.txt_tempo.hide()
+        self.txt_tempo.setText('5')  # insere o valor no campo de texto
+        self.iniciador_tempo() 
+    
+
+    def timer_set_10min(self):
+        self.set_min = QPushButton(' 10:00 ')
+        self.lyt.addWidget(self.set_min)
+        self.set_min.clicked.connect(self.timer_10)
+        self.set_min.show()
+        return self.set_min
+
+    def timer_10(self):
+        self.txt_tempo.hide()
+        self.txt_tempo.setText('10')  # insere o valor no campo de texto
+        self.iniciador_tempo()  
+
+    def timer_set_20min(self):
+        self.set_min = QPushButton(' 20:00 ')
+        self.lyt.addWidget(self.set_min)
+        self.set_min.clicked.connect(self.timer_20)
+        self.set_min.show()
+        return self.set_min
+
+    def timer_20(self):
+        self.txt_tempo.hide()
+        self.txt_tempo.setText('20')  # insere o valor no campo de texto
+        self.iniciador_tempo()  
+
+    def timer_set_30min(self):
+        self.set_min = QPushButton(' 30:00 ')
+        self.lyt.addWidget(self.set_min)
+        self.set_min.clicked.connect(self.timer_30)
+        self.set_min.show()
+        return self.set_min
+
+    def timer_30(self):
+        self.txt_tempo.hide()
+        self.txt_tempo.setText('30')  # insere o valor no campo de texto
+        self.iniciador_tempo()        # inicia o timer normalmente
+    
     def alert_pop(self):
         self.contador_alert = 0
         self.pop_up = QWidget()
@@ -231,7 +324,6 @@ class MainWindow(QWidget):
                 color: white;
                 border: 2px solid #388E3C;
                 border-radius: 8px;
-                padding: 6px 8px;
                 font-size: 14px;
             }
             QPushButton:hover { background-color: #45a049; }
@@ -244,6 +336,7 @@ class MainWindow(QWidget):
         self.pop_up.resize(300, 100)
         self.timer_alert.start()
         self.pop_up.show()
+        self.pop_up.showFullScreen()
         self.hide()
 
         QTimer.singleShot(1000 * 60, self.fechar_pop)
@@ -275,6 +368,7 @@ class MainWindow(QWidget):
             self.showNormal()
             self.activateWindow()
             self.raise_()
+
 
     def minimizar_depois(self, milissegundos=4000):
         self.showNormal()

@@ -38,4 +38,8 @@
   # ajudstado se clicar em excluir user e criar um novo proximo user continuar com mesmo tempo , o tempo nao zera ao excluir user
   # ajustado iniciar o timer e pausar ele minimiza a tela
 
-  
+#24/07 v0.6
+
+  # Colocado pre set de timer 
+  # ajustado o pop-up para ficar na tela toda preenchendo a tela
+  # Colocado o nome do user que esta logado
