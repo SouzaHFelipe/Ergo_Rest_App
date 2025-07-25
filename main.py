@@ -3,8 +3,9 @@ import os
 import logging
 import re
 import json
+from PySide6.QtGui import QIcon , QAction
 from PySide6.QtCore import QTimer, QEvent, Qt
-from PySide6.QtWidgets import (
+from PySide6.QtWidgets import ( QApplication, QMainWindow , QSystemTrayIcon, QMenu ,
     QApplication, QWidget, QGridLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QMessageBox)
 
 # Obtém o diretório onde está o script principal
@@ -27,6 +28,11 @@ class MainWindow(QWidget):
         self.resize(300, 100)
         self.lyt = QVBoxLayout()
         self.setLayout(self.lyt)
+
+        icon= "D:\\Git\Ergo_Rest_App\\rest_app_icon.ico"
+
+        self.setWindowIcon(QIcon(icon))
+        self.tray_icon = QSystemTrayIcon(QIcon(icon), parent=self)
 
         # Timers
         self.timer = QTimer(self)
@@ -85,6 +91,7 @@ class MainWindow(QWidget):
         self.grid_layout.addWidget(self.timer_set_10min(), 1, 1)
         self.grid_layout.addWidget(self.timer_set_20min(), 1, 2)
         self.grid_layout.addWidget(self.timer_set_30min(), 1, 3)
+        self.grid_layout.addWidget(self.timer_set_60min(), 1, 4)
 
         self.btn = QPushButton('Clique para iniciar')
         self.lyt.addWidget(self.btn)
@@ -105,13 +112,35 @@ class MainWindow(QWidget):
         self.lyt.addWidget(self.reiniciar_tempo)
         self.reiniciar_tempo.clicked.connect(self.reiniciar_timer)
 
+        #bandeja
+        menu = QMenu()
+        restaurar = QAction("Restaurar")
+        sair = QAction("Sair")
+        menu.addAction(restaurar)
+        menu.addAction(sair)
+        self.tray_icon.setContextMenu(menu)
+
+        restaurar.triggered.connect(self.showNormal)
+        sair.triggered.connect(QApplication.quit)
         
+        self.tray_icon.show()
+        self.tray_icon.activated.connect(self.icone_ativado)
+
 
         # Login
         self.login_app()
         self.validar_user_criado()
+    
+    def icone_ativado(self, reason):
+        if reason == QSystemTrayIcon.DoubleClick:
+            self.restaurar_janela()
    
-   
+    def restaurar_janela(self):
+        self.showNormal()
+        self.raise_()
+        self.activateWindow()
+
+
     def nome_user(self):
         with open('config.json' , 'r' ) as f:
             self.user_login = json.load(f)
@@ -304,6 +333,18 @@ class MainWindow(QWidget):
     def timer_30(self):
         self.txt_tempo.hide()
         self.txt_tempo.setText('30')  # insere o valor no campo de texto
+        self.iniciador_tempo()        # inicia o timer normalmente
+
+    def timer_set_60min(self):
+        self.set_min = QPushButton(' 60:00 ')
+        self.lyt.addWidget(self.set_min)
+        self.set_min.clicked.connect(self.timer_60)
+        self.set_min.show()
+        return self.set_min
+
+    def timer_60(self):
+        self.txt_tempo.hide()
+        self.txt_tempo.setText('60')  # insere o valor no campo de texto
         self.iniciador_tempo()        # inicia o timer normalmente
     
     def alert_pop(self):
