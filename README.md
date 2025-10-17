@@ -1,6 +1,10 @@
 # Ergo_Rest_App
 
-App para questoes ergonomicas
+Aplicao para o auxilio em pausas ergonomicas
+
+Criado utilizando as Bibliotecas: 
+
+PySide6 , os , sys , json , logging
 
 <img width="402" height="233" alt="image" src="https://github.com/user-attachments/assets/70df1c9e-6f12-4297-aefa-ec7abcde1b22" />
 
